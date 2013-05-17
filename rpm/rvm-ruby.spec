@@ -7,12 +7,10 @@
 Name: rvm-ruby
 Summary: Ruby Version Manager
 Version: 3  # Version will be appended the commit date
-Release: 1.el6_CS
+Release: 1.20.9
 License: ASL 2.0
 URL: http://rvm.beginrescueend.com/
 Group: Applications/System
-
-Source: %{name}-%{version}.tar
 
 #BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-%(%{__id_u} -n)
@@ -25,7 +23,7 @@ Requires(pre): shadow-utils
 # For rvm
 Requires: bash curl git
 # Basics for building ruby 1.8/1.9
-Requires: gcc-c++ patch readline readline-devel zlib-devel libyaml-devel libffi-devel openssl-devel
+#Requires: gcc-c++ patch readline readline-devel zlib-devel libyaml-devel libffi-devel openssl-devel
 # Used by the scripts
 Requires: sed grep tar gzip bzip2 make file
 
@@ -42,18 +40,6 @@ ensure correct permissions for the shared RVM content.
 RVM is activated for all logins by default. To disable remove
 %{_sysconfdir}/profile.d/rvm.sh and source rvm from each users shell.
 
-Rubies in this package:
-ruby-1.9.3-p0
-  bundler
-  bluepill
-  whenever
-
-ruby-1.9.2-p290
-  bundler
-  bluepill
-  whenever
-
-
 %prep
 %setup -q
 
@@ -68,12 +54,15 @@ for i in `env | grep ^rvm_ | cut -d"=" -f1`; do
 done
 
 # Install everything into one directory
-rvm_ignore_rvmrc=1 \
+export rvm_ignore_rvmrc=1 \
   rvm_user_install_flag=0 \
   rvm_path="%{buildroot}%{rvm_dir}" \
   rvm_bin_path="%{buildroot}%{_bindir}" \
   rvm_man_path="%{buildroot}%{_mandir}" \
-  ./install
+  HOME=%{buildroot}
+
+\curl -L https://get.rvm.io | bash -s stable --version %{release}
+  #./install
 
 # So members of the rvm group can write to it
 find %{buildroot}%{rvm_dir} -exec chmod ug+w {} \;
@@ -114,7 +103,7 @@ END_OF_RVMSH
 
 chmod 755 %{buildroot}%{_sysconfdir}/profile.d/rvm.sh
 
-mv %{buildroot}%{_bindir}/rake %{buildroot}%{_bindir}/rvm-rake
+#mv %{buildroot}%{_bindir}/rake %{buildroot}%{_bindir}/rvm-rake
 
 
 # At this point, install of RVM is finished
@@ -130,19 +119,11 @@ export rvm_man_path="%{buildroot}%{_mandir}"
 source ${rvm_path}/scripts/rvm
 gemi='gem install --no-ri --no-rdoc'
 
-ruby_tag=ruby-1.9.3-p0
+#touch $rvm_path/RELEASE
+ruby_tag=ruby-1.9.3-p286
 rvm install $ruby_tag
 rvm use $ruby_tag
-$gemi bundler
-$gemi whenever
-$gemi bluepill
-
-ruby_tag=ruby-1.9.2-p290
-rvm install $ruby_tag
-rvm use $ruby_tag
-$gemi bundler
-$gemi whenever
-$gemi bluepill
+#$gemi bundler
 
 #ruby_tag=ruby-1.8.7-p352
 #rvm install $ruby_tag
@@ -183,7 +164,7 @@ for f in `find $br -type f -name \*.a`; do
 
     # Replace the bad path with the good one, padded by nulls
     ruby -p -i -e '
-      $_.gsub!(/#{ENV["br"]}(.*?)\0/) do |s|
+      $_.encode!("UTF-8", "UTF-8", :invalid => :replace).gsub!(/#{ENV["br"]}(.*?)\0/) do |s|
       $1 + ( "\0" * ENV["br"].size ) + "\0"
       end
     ' $g
@@ -200,7 +181,7 @@ for f in `find $br/usr/lib/rvm/rubies -type f -print0 |xargs -0 file --no-derefe
 
   # Replace the bad path with the good one, padded by nulls
   ruby -p -i -e '
-    $_.gsub!(/#{ENV["br"]}(.*?)\0/) do |s|
+    $_.encode!("UTF-8", "UTF-8", :invalid => :replace).gsub!(/#{ENV["br"]}(.*?)\0/) do |s|
     $1 + ( "\0" * ENV["br"].size ) + "\0"
     end
   ' $f
@@ -208,9 +189,10 @@ done
 
 # Fix symlinks with bad path
 for f in `find $br -type l |grep "$br"`; do
-    ln -sf `readlink -f $f |sed "s,$br,,"` $f
+    ln -sfn `readlink -f $f |sed "s,$br,,"` $f
 done
 
+find $br -maxdepth 1 -name '.*' -exec rm -rf {} \;
 
 %clean
 rm -rf %{buildroot}
@@ -224,7 +206,7 @@ exit 0
 %config(noreplace) /etc/rvmrc
 %config(noreplace) /etc/profile.d/rvm.sh
 %attr(-,root,%{rvm_group}) %{rvm_dir}
-%{_bindir}
+%{_bindir}/*
 %{_mandir}/man1/*
 
 %changelog
