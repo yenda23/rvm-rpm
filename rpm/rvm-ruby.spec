@@ -130,8 +130,8 @@ export br=%{buildroot}
 
 # Remove sources
 rm -rf $br/usr/lib/rvm/src/*
-# Remove logs
-rm -rf $br/usr/lib/rvm/log/*
+# Remove logfiles
+find $br/usr/lib/rvm/log -type f -exec rm {} \;
 
 # Strip binaries
 #find $br -type f -print0 |xargs -0 file --no-dereference --no-pad |grep 'not stripped' |cut -f1 -d: |xargs -r strip
