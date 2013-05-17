@@ -132,6 +132,9 @@ export br=%{buildroot}
 
 # Remove sources
 rm -rf $br/usr/lib/rvm/src
+# Remove logs
+rm -rf $br/usr/lib/rvm/log/*
+
 
 # Strip binaries
 #find $br -type f -print0 |xargs -0 file --no-dereference --no-pad |grep 'not stripped' |cut -f1 -d: |xargs -r strip
@@ -162,8 +165,15 @@ for f in `find $br -type f -name \*.a`; do
 
     # Replace the bad path with the good one, padded by nulls
     ruby -p -i -e '
-      $_.encode!("UTF-8", "UTF-8", :invalid => :replace).gsub!(/#{ENV["br"]}(.*?)\0/) do |s|
-      $1 + ( "\0" * ENV["br"].size ) + "\0"
+      require "iconv" unless String.method_defined?(:encode)
+      if String.method_defined?(:encode)
+        $_.encode!("UTF-8", "UTF-8", :invalid => :replace)
+      else
+        ic = Iconv.new("UTF-8", "UTF-8//IGNORE")
+        $_ = ic.iconv($_)
+      end
+      $_.gsub!(/#{ENV["br"]}(.*?)\0/) do |s|
+        $1 + ( "\0" * ENV["br"].size ) + "\0"
       end
     ' $g
   done
