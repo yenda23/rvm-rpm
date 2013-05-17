@@ -135,7 +135,6 @@ rm -rf $br/usr/lib/rvm/src
 # Remove logs
 rm -rf $br/usr/lib/rvm/log/*
 
-
 # Strip binaries
 #find $br -type f -print0 |xargs -0 file --no-dereference --no-pad |grep 'not stripped' |cut -f1 -d: |xargs -r strip
 
@@ -153,6 +152,17 @@ done
 find $br -type f \( -name \*.log -o -name \*.la \) -print0 |xargs -0 -r sed -i "s,$br,,g"
 find $br -type f -print0 |xargs -0 file --no-dereference --no-pad |grep ': .* text' |cut -f1 -d: |xargs -r sed -i "s,$br,,g"
 
+# some Ruby code to replace library paths in binary files
+# should work with Ruby 1.9 and 1.8
+! read -d '' fixpath <<"EOF"
+if String.method_defined?(:encode)
+  $_.encode!("UTF-8", "UTF-8", :invalid => :replace)
+end
+$_.gsub!(/#{ENV["br"]}(.*?)\0/) do |s|
+  $1 + ( "\0" * ENV["br"].size ) + "\0"
+end
+EOF
+
 # Strip object files in ar archives from bad path strings
 for f in `find $br -type f -name \*.a`; do
   td=`mktemp -d`
@@ -164,18 +174,7 @@ for f in `find $br -type f -name \*.a`; do
     grep "$br" $g || continue
 
     # Replace the bad path with the good one, padded by nulls
-    ruby -p -i -e '
-      require "iconv" unless String.method_defined?(:encode)
-      if String.method_defined?(:encode)
-        $_.encode!("UTF-8", "UTF-8", :invalid => :replace)
-      else
-        ic = Iconv.new("UTF-8", "UTF-8//IGNORE")
-        $_ = ic.iconv($_)
-      end
-      $_.gsub!(/#{ENV["br"]}(.*?)\0/) do |s|
-        $1 + ( "\0" * ENV["br"].size ) + "\0"
-      end
-    ' $g
+    ruby -p -i -e "$fixpath" $g
   done
 
   ar r $f *
@@ -188,11 +187,7 @@ for f in `find $br/usr/lib/rvm/rubies -type f -print0 |xargs -0 file --no-derefe
   grep "$br" $f || continue
 
   # Replace the bad path with the good one, padded by nulls
-  ruby -p -i -e '
-    $_.encode!("UTF-8", "UTF-8", :invalid => :replace).gsub!(/#{ENV["br"]}(.*?)\0/) do |s|
-    $1 + ( "\0" * ENV["br"].size ) + "\0"
-    end
-  ' $f
+  ruby -p -i -e "$fixpath" $f
 done
 
 # Fix symlinks with bad path
@@ -201,6 +196,7 @@ for f in `find $br -type l |grep "$br"`; do
 done
 
 find $br -maxdepth 1 -name '.*' -exec rm -rf {} \;
+rm $br/usr/share/man/man1/rvm.1.gz
 
 %clean
 rm -rf %{buildroot}
