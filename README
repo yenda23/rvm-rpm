@@ -1,0 +1,22 @@
+This is a fork of <http://github.com/wayneeseguin/rvm>. I added branches `rpm` and `rpmtest`. The main branch to use is `rpm`.
+
+I do not plan to work on RVM. I simply added a `rpm` folder which contains a `rvm-ruby.spec` and a script to create the RPM from the sources.
+
+Just clone this repo, customize the rubies and gems needed as indicated below, go at the root, and launch:
+
+    ./rpm/create_rpm_from_here
+
+The `rvm-ruby.spec` file is based on <https://github.com/mdkent/rvm-rpm/blob/master/SPECS/rvm-ruby.spec>. I applied some customizations to make it compatibe with the small script i made to create the RPM. What i added is at the end of the `%install` section, beginning at
+
+    # At this point, install of RVM is finished
+    # Now install some rubies
+    (...)
+    ruby_tag=ruby-1.9.3-p0
+    rvm install $ruby_tag
+    rvm use $ruby_tag
+    gem install bundler --no-ri --no-rdoc
+    (...)
+
+There, i added instructions to build and packages some rubies and gems i want to deploy on all my servers. Up to you to modify that for your own needs.
+
+Last time i checked, it did not work on the `master` branch or RVM. It works with the `stable` branch.
