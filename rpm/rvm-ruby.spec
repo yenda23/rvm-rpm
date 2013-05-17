@@ -6,7 +6,7 @@
 
 Name: rvm-ruby
 Summary: Ruby Version Manager
-Version: 3  # Version will be appended the commit date
+Version: 4  # Version will be appended the commit date
 Release: 1.20.9
 License: ASL 2.0
 URL: http://rvm.beginrescueend.com/
@@ -17,7 +17,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-%(%{__id_u} -n)
 
 BuildRequires: bash curl git
 BuildRequires: gcc-c++ patch chrpath readline readline-devel zlib-devel libyaml-devel libffi-devel openssl-devel
-BuildRequires: sed grep tar gzip bzip2 make file ruby
+BuildRequires: sed grep tar gzip bzip2 make file
 
 Requires(pre): shadow-utils
 # For rvm
@@ -50,15 +50,14 @@ for i in `env | grep ^rvm_ | cut -d"=" -f1`; do
   unset $i;
 done
 
-(
 # Install everything into one directory
+(
 export rvm_ignore_rvmrc=1 \
   rvm_user_install_flag=0 \
   rvm_path="%{buildroot}%{rvm_dir}" \
   rvm_man_path="%{buildroot}%{_mandir}" \
   HOME=%{buildroot}
 \curl -L https://get.rvm.io | bash -s stable --version %{release}
-  #./install
 )
 
 # So members of the rvm group can write to it
@@ -119,7 +118,8 @@ gemi='gem install --no-ri --no-rdoc'
 ruby_tag=ruby-1.9.3-p286
 rvm install $ruby_tag
 rvm use $ruby_tag
-#$gemi bundler
+$gemi bundler
+#$gemi whatever_gem_you_need
 
 #ruby_tag=ruby-1.8.7-p352
 #rvm install $ruby_tag
@@ -129,7 +129,7 @@ rvm use $ruby_tag
 export br=%{buildroot}
 
 # Remove sources
-rm -rf $br/usr/lib/rvm/src
+rm -rf $br/usr/lib/rvm/src/*
 # Remove logs
 rm -rf $br/usr/lib/rvm/log/*
 
@@ -150,16 +150,47 @@ done
 find $br -type f \( -name \*.log -o -name \*.la \) -print0 |xargs -0 -r sed -i "s,$br,,g"
 find $br -type f -print0 |xargs -0 file --no-dereference --no-pad |grep ': .* text' |cut -f1 -d: |xargs -r sed -i "s,$br,,g"
 
-# some Ruby code to replace library paths in binary files
-# should work with Ruby 1.9 and 1.8
-! read -d '' fixpath <<"EOF"
-if String.method_defined?(:encode)
-  $_.encode!("UTF-8", "UTF-8", :invalid => :replace)
-end
-$_.gsub!(/#{ENV["br"]}(.*?)\0/) do |s|
-  $1 + ( "\0" * ENV["br"].size ) + "\0"
-end
-EOF
+# courtesy http://everydaywithlinux.blogspot.com.au/2012/11/patch-strings-in-binary-files-with-sed.html
+function patch_strings_in_file() {
+    local FILE="$1"
+    local PATTERN="$2"
+    local REPLACEMENT="$3"
+
+    # Find all unique strings in FILE that contain the pattern 
+    STRINGS=$(strings ${FILE} | grep ${PATTERN} | sort -u -r)
+
+    if [ "${STRINGS}" != "" ] ; then
+        echo "File '${FILE}' contain strings with '${PATTERN}' in them:"
+
+        for OLD_STRING in ${STRINGS} ; do
+            # Create the new string with a simple bash-replacement
+            NEW_STRING=${OLD_STRING//${PATTERN}/${REPLACEMENT}}
+
+            # Create null terminated ASCII HEX representations of the strings
+            OLD_STRING_HEX="$(echo -n ${OLD_STRING} | xxd -g 0 -u -ps -c 256)00"
+            NEW_STRING_HEX="$(echo -n ${NEW_STRING} | xxd -g 0 -u -ps -c 256)00"
+
+            if [ ${#NEW_STRING_HEX} -le ${#OLD_STRING_HEX} ] ; then
+                # Pad the replacement string with null terminations so the
+                # length matches the original string
+                while [ ${#NEW_STRING_HEX} -lt ${#OLD_STRING_HEX} ] ; do
+                    NEW_STRING_HEX="${NEW_STRING_HEX}00"
+                done
+
+                # Now, replace every occurrence of OLD_STRING with NEW_STRING 
+                echo -n "Replacing ${OLD_STRING} with ${NEW_STRING}... "
+                hexdump -ve '1/1 "%.2X"' ${FILE} | \
+                sed "s/${OLD_STRING_HEX}/${NEW_STRING_HEX}/g" | \
+                xxd -r -p > ${FILE}.tmp
+                mv ${FILE}.tmp ${FILE}
+                echo "Done!"
+            else
+                echo "New string '${NEW_STRING}' is longer than old" \
+                     "string '${OLD_STRING}'. Skipping."
+            fi
+        done
+    fi
+}
 
 # Strip object files in ar archives from bad path strings
 for f in `find $br -type f -name \*.a`; do
@@ -172,7 +203,7 @@ for f in `find $br -type f -name \*.a`; do
     grep "$br" $g || continue
 
     # Replace the bad path with the good one, padded by nulls
-    ruby -p -i -e "$fixpath" $g
+    patch_strings_in_file $g "$br"
   done
 
   ar r $f *
@@ -185,7 +216,7 @@ for f in `find $br/usr/lib/rvm/rubies -type f -print0 |xargs -0 file --no-derefe
   grep "$br" $f || continue
 
   # Replace the bad path with the good one, padded by nulls
-  ruby -p -i -e "$fixpath" $f
+  patch_strings_in_file $f "$br" 
 done
 
 # Fix symlinks with bad path
@@ -211,6 +242,12 @@ exit 0
 %{_mandir}/man1/*
 
 %changelog
+* Fri May 18 2013 Christoph Dwertmann - 4.xxx
+- downloads RVM instead of relying on local sources
+- works with latest RVM and Fedora
+- removed ruby build dependency
+- no more clashing with distribution ruby
+
 * Fri Mar 30 2012 Alexandre Fouche - 3.xxx
 Add some rubies and gems to compile:
 - 1.9.2-p290 + bundler, bluepill, whenever
