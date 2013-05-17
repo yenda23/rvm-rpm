@@ -55,7 +55,6 @@ done
 export rvm_ignore_rvmrc=1 \
   rvm_user_install_flag=0 \
   rvm_path="%{buildroot}%{rvm_dir}" \
-  rvm_bin_path="%{buildroot}%{_bindir}" \
   rvm_man_path="%{buildroot}%{_mandir}" \
   HOME=%{buildroot}
 \curl -L https://get.rvm.io | bash -s stable --version %{release}
@@ -112,7 +111,6 @@ chmod 755 %{buildroot}%{_sysconfdir}/profile.d/rvm.sh
 export rvm_ignore_rvmrc=1
 export rvm_user_install_flag=0
 export rvm_path="%{buildroot}%{rvm_dir}"
-export rvm_bin_path="%{buildroot}%{_bindir}"
 export rvm_man_path="%{buildroot}%{_mandir}"
 source ${rvm_path}/scripts/rvm
 gemi='gem install --no-ri --no-rdoc'
@@ -210,7 +208,6 @@ exit 0
 %config(noreplace) /etc/rvmrc
 %config(noreplace) /etc/profile.d/rvm.sh
 %attr(-,root,%{rvm_group}) %{rvm_dir}
-%{_bindir}/*
 %{_mandir}/man1/*
 
 %changelog
