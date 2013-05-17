@@ -11,13 +11,13 @@ Release: 1.20.9
 License: ASL 2.0
 URL: http://rvm.beginrescueend.com/
 Group: Applications/System
-
+#Source: %{name}-%{version}.tar
 #BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-%(%{__id_u} -n)
 
 BuildRequires: bash curl git
 BuildRequires: gcc-c++ patch chrpath readline readline-devel zlib-devel libyaml-devel libffi-devel openssl-devel
-BuildRequires: sed grep tar gzip bzip2 make file
+BuildRequires: sed grep tar gzip bzip2 make file ruby
 
 Requires(pre): shadow-utils
 # For rvm
@@ -40,9 +40,6 @@ ensure correct permissions for the shared RVM content.
 RVM is activated for all logins by default. To disable remove
 %{_sysconfdir}/profile.d/rvm.sh and source rvm from each users shell.
 
-%prep
-%setup -q
-
 %build
 
 %install
@@ -53,6 +50,7 @@ for i in `env | grep ^rvm_ | cut -d"=" -f1`; do
   unset $i;
 done
 
+(
 # Install everything into one directory
 export rvm_ignore_rvmrc=1 \
   rvm_user_install_flag=0 \
@@ -60,9 +58,9 @@ export rvm_ignore_rvmrc=1 \
   rvm_bin_path="%{buildroot}%{_bindir}" \
   rvm_man_path="%{buildroot}%{_mandir}" \
   HOME=%{buildroot}
-
 \curl -L https://get.rvm.io | bash -s stable --version %{release}
   #./install
+)
 
 # So members of the rvm group can write to it
 find %{buildroot}%{rvm_dir} -exec chmod ug+w {} \;
