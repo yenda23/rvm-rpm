@@ -7,23 +7,22 @@
 Name: rvm-ruby
 Summary: Ruby Version Manager
 Version: 4  # Version will be appended the commit date
-Release: 1.20.9
+# choose a version from https://github.com/wayneeseguin/rvm/tags
+Release: 1.20.10
 License: ASL 2.0
 URL: http://rvm.beginrescueend.com/
 Group: Applications/System
-#Source: %{name}-%{version}.tar
-#BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-%(%{__id_u} -n)
 
 BuildRequires: bash curl git
-BuildRequires: gcc-c++ patch chrpath readline readline-devel zlib-devel libyaml-devel libffi-devel openssl-devel
+BuildRequires: gcc-c++ patch chrpath readline readline-devel zlib-devel libyaml-devel libffi-devel openssl-devel autoconf automake libtool bison
 BuildRequires: sed grep tar gzip bzip2 make file
 
 Requires(pre): shadow-utils
 # For rvm
 Requires: bash curl git
 # Basics for building ruby 1.8/1.9
-#Requires: gcc-c++ patch readline readline-devel zlib-devel libyaml-devel libffi-devel openssl-devel
+Requires: gcc-c++ patch readline readline-devel zlib-devel libyaml-devel libffi-devel openssl-devel autoconf automake libtool bison
 # Used by the scripts
 Requires: sed grep tar gzip bzip2 make file
 
@@ -99,9 +98,6 @@ END_OF_RVMSH
 
 chmod 755 %{buildroot}%{_sysconfdir}/profile.d/rvm.sh
 
-#mv %{buildroot}%{_bindir}/rake %{buildroot}%{_bindir}/rvm-rake
-
-
 # At this point, install of RVM is finished
 # Now install some rubies
 
@@ -152,7 +148,7 @@ find $br -type f \( -name \*.log -o -name \*.la \) -print0 |xargs -0 -r sed -i "
 find $br -type f -print0 |xargs -0 file --no-dereference --no-pad |grep ': .* text' |cut -f1 -d: |xargs -r sed -i "s,$br,,g"
 
 # Replace bad paths in all remaining files
-# Padding with zeroes broke the LOAD_PATH in libruby, therefore prepend path with harmless slashes
+# Padding with zeroes broke the LOAD_PATH in libruby, therefore prepend path with harmless forward slashes
 printf -vch "%${#br}s" ""
 slashes=$(printf "%s" "${ch// //}")
 find $br -type f -print0 | xargs -0 sed -i "s,$br,$slashes,g"
