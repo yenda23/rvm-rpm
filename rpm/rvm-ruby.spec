@@ -6,11 +6,11 @@
 
 Name: rvm-ruby
 Summary: Ruby Version Manager
-Version: 4  # Version will be appended the commit date
-# choose a version from https://github.com/wayneeseguin/rvm/tags
+Version: 4  # Commit date will be appended
+# pick a RVM version from https://github.com/wayneeseguin/rvm/tags
 Release: 1.20.10
 License: ASL 2.0
-URL: http://rvm.beginrescueend.com/
+URL: http://rvm.io/
 Group: Applications/System
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-%(%{__id_u} -n)
 
@@ -27,7 +27,7 @@ Requires: gcc-c++ patch readline readline-devel zlib-devel libyaml-devel libffi-
 Requires: sed grep tar gzip bzip2 make file
 
 %description
-RVM is the Ruby Version Manager (rvm). It manages Ruby interpreter environments
+RVM is the Ruby Version Manager. It manages Ruby interpreter environments
 and switching between them.
 
 This package is meant for use by multiple users maintaining a shared copy of
@@ -38,8 +38,6 @@ ensure correct permissions for the shared RVM content.
 
 RVM is activated for all logins by default. To disable remove
 %{_sysconfdir}/profile.d/rvm.sh and source rvm from each users shell.
-
-%build
 
 %install
 rm -rf %{buildroot}
@@ -110,7 +108,6 @@ export rvm_man_path="%{buildroot}%{_mandir}"
 source ${rvm_path}/scripts/rvm
 gemi='gem install --no-ri --no-rdoc'
 
-#touch $rvm_path/RELEASE
 ruby_tag=ruby-1.9.3-p286
 rvm install $ruby_tag
 rvm use $ruby_tag
@@ -124,11 +121,6 @@ rvm cleanup all
 )
 
 export br=%{buildroot}
-
-# Remove sources
-rm -rf $br/usr/lib/rvm/src/*
-# Remove logfiles
-find $br/usr/lib/rvm/log -type f -exec rm {} \;
 
 # Strip binaries
 #find $br -type f -print0 |xargs -0 file --no-dereference --no-pad |grep 'not stripped' |cut -f1 -d: |xargs -r strip
