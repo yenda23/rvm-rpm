@@ -5,7 +5,7 @@
 %define _buildshell /bin/bash
 
 Name: rvm-ruby
-Summary: Ruby Version Manager
+Summary: Ruby Version Manager (including Rubies and Gems)
 Version: 4  # Commit date will be appended
 # pick a RVM version from https://github.com/wayneeseguin/rvm/tags
 Release: 1.20.10
@@ -43,7 +43,7 @@ RVM is activated for all logins by default. To disable remove
 rm -rf %{buildroot}
 
 # Clean the env
-for i in `env | grep ^rvm_ | cut -d"=" -f1`; do
+for i in $(env | grep ^rvm_ | cut -d"=" -f1); do
   unset $i;
 done
 
@@ -127,12 +127,12 @@ export br=%{buildroot}
 
 # Strip and Fix bad paths in generated files
 # That is not optimized, but that is not supposed to be done often
-for f in `find $br -type f -print0 |xargs -0 file --no-dereference --no-pad |grep ': ELF' |cut -f1 -d:`; do
+for f in $(find $br -type f -print0 |xargs -0 file --no-dereference --no-pad |grep ': ELF' |cut -f1 -d:); do
   strip $f
   grep "$br" $f || continue
-  line=`chrpath -l $f` || continue
+  line=$(chrpath -l $f) || continue
   echo $line |grep "$br" || continue
-  chrpath -r `echo $line |cut -f2 -d= |sed "s,$br,,"` $f
+  chrpath -r $(echo $line |cut -f2 -d= |sed "s,$br,,") $f
 done
 
 # Replace bad paths in text files
@@ -146,8 +146,8 @@ slashes=$(printf "%s" "${ch// //}")
 find $br -type f -print0 | xargs -0 sed -i "s,$br,$slashes,g"
 
 # Fix symlinks with bad path
-for f in `find $br -type l |grep "$br"`; do
-    ln -sfn `readlink -f $f |sed "s,$br,,"` $f
+for f in $(find $br -type l |grep "$br"); do
+    ln -sfn $(readlink -f $f |sed "s,$br,,") $f
 done
 
 find $br -maxdepth 1 -name '.*' -exec rm -rf {} \;
