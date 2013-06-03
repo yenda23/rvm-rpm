@@ -18,3 +18,4 @@ The `rvm-ruby.spec` file is based on <https://github.com/mdkent/rvm-rpm/blob/mas
 There, I added instructions to build and packages some rubies and gems i want to deploy on all my servers. Up to you to modify that for your own needs.
 
 Tested with stable RVM version 1.20.10
+
