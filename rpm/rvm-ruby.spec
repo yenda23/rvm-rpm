@@ -4,11 +4,17 @@
 # RVM can not be sourced with default /bin/sh
 %define _buildshell /bin/bash
 
-Name: rvm-ruby
-Summary: Ruby Version Manager (including Rubies and Gems)
-Version: 4  # Commit date will be appended
+# PL conventions
+%define name rvm-ruby
 # pick a RVM version from https://github.com/wayneeseguin/rvm/tags
-Release: 1.20.10
+%define version 1.20.10
+%define taglevel 4
+%define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
+
+Summary: Ruby Version Manager (including Rubies and Gems)
+Name: %{name}
+Version: %{version}
+Release: %{release}
 License: ASL 2.0
 URL: http://rvm.io/
 Group: Applications/System
