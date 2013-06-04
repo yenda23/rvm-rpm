@@ -60,7 +60,7 @@ export rvm_ignore_rvmrc=1 \
   rvm_path="%{buildroot}%{rvm_dir}" \
   rvm_man_path="%{buildroot}%{_mandir}" \
   HOME=%{buildroot}
-\curl -L https://get.rvm.io | bash -s stable --version %{release}
+\curl -L https://get.rvm.io | bash -s stable --version %{version}
 )
 
 # So members of the rvm group can write to it
