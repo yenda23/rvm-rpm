@@ -153,7 +153,11 @@ find $br -type f -print0 | xargs -0 sed -i "s,$br,$slashes,g"
 
 # Fix symlinks with bad path
 for f in $(find $br -type l |grep "$br"); do
-    ln -sfn $(readlink -f $f |sed "s,$br,,") $f
+# original version read like this
+#    ln -sfn $(readlink -f $f |sed "s,$br,,") $f
+# however in the PL environment, readlink transforms /longbuildroot into /build,
+# and then sed fails to do its job, so readlink does not seem such a good idea
+    ln -sfn $(echo $f | sed "s,^$br,,") $f
 done
 
 find $br -maxdepth 1 -name '.*' -exec rm -rf {} \;
