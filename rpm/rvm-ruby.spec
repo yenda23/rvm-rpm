@@ -147,7 +147,7 @@ find $br -type f -print0 | xargs -0 sed -i "s,$br,$slashes,g"
 
 # Fix symlinks with bad path
 for f in $(find $br -type l |grep "$br"); do
-    ln -sfn $(readlink -f $f |sed "s,$br,,") $f
+    ln -sfn $(echo $f | sed "s,^$br,,") $f
 done
 
 find $br -maxdepth 1 -name '.*' -exec rm -rf {} \;
