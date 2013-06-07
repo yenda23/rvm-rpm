@@ -161,6 +161,9 @@ rm $br/usr/share/man/man1/rvm.1.gz
 
 %clean
 rm -rf %{buildroot}
+# it appears that, because we build as root, rvm installs stuff in /etc on the build box
+# which is not desirable, so let us get rid of that - don't worry if that fails
+find /etc -name 'rvm*' | xargs rm || :
 
 %pre
 getent group %{rvm_group} >/dev/null || groupadd -r %{rvm_group}
