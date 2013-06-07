@@ -3,6 +3,11 @@
 # This script will build a RPM from the files in the current directory, given that there is a rpm/file.spec
 # Its primary purpose is to be used by Jenkins
 
+if [ $UID == 0 ]; then
+  echo "Please do not build RPM packages as root"
+  exit 1
+fi
+
 set -e
 set -x
 

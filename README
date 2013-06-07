@@ -1,6 +1,6 @@
 This is basically a .spec file which builds and packages RVM and selected Rubies & Gems into a RPM. RVM is installed system-wide for all users and is ready to use immediately, with no compilation needed on the target machine.
 
-Just clone this repo, customize the rubies and gems needed as indicated below and launch:
+Just clone this repo, customize the rubies and gems needed as indicated below and run (as user, not root!):
 
     ./rpm/create_rpm_from_here
 
