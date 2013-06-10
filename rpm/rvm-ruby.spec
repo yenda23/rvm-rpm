@@ -166,7 +166,7 @@ for f in $(find $br -type l); do
 	# call readlink with -f so all symlinmks are solved
 	# and so we can reliably substitute $brc that is also canonicalized
 	destc=$(readlink -f $f | sed -e "s,^$brc,,")
-	ls -sfn $destc $f
+	ln -sfn $destc $f
     fi
 done
 
