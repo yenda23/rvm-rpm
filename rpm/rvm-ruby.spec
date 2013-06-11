@@ -8,7 +8,7 @@
 %define name rvm-ruby
 # pick a RVM version from https://github.com/wayneeseguin/rvm/tags
 %define version 1.20.10
-%define taglevel 4
+%define taglevel 5
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
 Summary: Ruby Version Manager (including Rubies and Gems)
