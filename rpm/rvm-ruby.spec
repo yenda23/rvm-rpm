@@ -146,8 +146,22 @@ slashes=$(printf "%s" "${ch// //}")
 find $br -type f -print0 | xargs -0 sed -i "s,$br,$slashes,g"
 
 # Fix symlinks with bad path
-for f in $(find $br -type l |grep "$br"); do
-    ln -sfn $(echo $f | sed "s,^$br,,") $f
+# the canonical path of the build root
+brc=$(readlink -f $br)
+for f in $(find $br -type l); do
+    # some symlinks are relative, in which case we want to preserve them
+    # do *not* mention -f here as it would always return an absolute path
+    dest=$(readlink $f)
+    # relative symlinks have $dest not starting with a /
+    first_step=$(echo $dest | cut -d / -f1)
+    # absolute paths have a void first_step 
+    if [ -z "$first_step" ] ; then
+  # destination is an absolute path, let's fix it
+	# call readlink with -f so all symlinmks are solved
+	# and so we can reliably substitute $brc that is also canonicalized
+	destc=$(readlink -f $f | sed -e "s,^$brc,,")
+	ln -sfn $destc $f
+    fi
 done
 
 find $br -maxdepth 1 -name '.*' -exec rm -rf {} \;
