@@ -28,7 +28,8 @@ Requires(pre): shadow-utils
 # For rvm
 Requires: bash curl git
 # Basics for building ruby 1.8/1.9
-Requires: gcc-c++ patch readline readline-devel zlib-devel libyaml-devel libffi-devel openssl-devel autoconf automake libtool bison
+# We expect all the building to take place .. at build-time, so let's take this out
+#Requires: gcc-c++ patch readline readline-devel zlib-devel libyaml-devel libffi-devel openssl-devel autoconf automake libtool bison
 # Used by the scripts
 Requires: sed grep tar gzip bzip2 make file
 
@@ -117,7 +118,7 @@ gemi='gem install --no-ri --no-rdoc'
 ruby_tag=ruby-1.9.3-p286
 rvm install $ruby_tag
 rvm use $ruby_tag
-$gemi bundler
+$gemi omf_rc
 #$gemi whatever_gem_you_need
 
 #ruby_tag=ruby-1.8.7-p352
