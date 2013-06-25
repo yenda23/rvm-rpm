@@ -8,7 +8,7 @@
 %define name rvm-ruby
 # pick a RVM version from https://github.com/wayneeseguin/rvm/tags
 %define version 1.20.10
-%define taglevel 5
+%define taglevel 6
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
 Summary: Ruby Version Manager (including Rubies and Gems)
@@ -192,6 +192,9 @@ exit 0
 %{_mandir}/man1/*
 
 %changelog
+* Tue Jun 25 2013 Thierry Parmentelat - rvm-ruby-1.20.10-6
+- add omf-rc in the mix
+
 * Fri May 18 2013 Christoph Dwertmann - 4.xxx
 - downloads RVM instead of relying on local sources
 - works with latest RVM and Fedora
