@@ -118,6 +118,8 @@ gemi='gem install --no-ri --no-rdoc'
 ruby_tag=ruby-1.9.3-p286
 rvm install $ruby_tag
 rvm use $ruby_tag
+rvm gemset create omf
+rvm use $ruby_tag@omf
 $gemi omf_rc
 #$gemi whatever_gem_you_need
 
