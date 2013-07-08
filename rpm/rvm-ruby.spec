@@ -23,6 +23,8 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-%(%{__id_u} -n)
 BuildRequires: bash curl git
 BuildRequires: gcc-c++ patch chrpath readline readline-devel zlib-devel libyaml-devel libffi-devel openssl-devel autoconf automake libtool bison
 BuildRequires: sed grep tar gzip bzip2 make file
+# for OMF:
+BuildRequires: tar libxml2 libxml2-devel libxslt libxslt-devel
 
 Requires(pre): shadow-utils
 # For rvm
@@ -32,6 +34,8 @@ Requires: bash curl git
 #Requires: gcc-c++ patch readline readline-devel zlib-devel libyaml-devel libffi-devel openssl-devel autoconf automake libtool bison
 # Used by the scripts
 Requires: sed grep tar gzip bzip2 make file
+# for OMF:
+Requires: libxml2 libxslt
 
 %description
 RVM is the Ruby Version Manager. It manages Ruby interpreter environments
