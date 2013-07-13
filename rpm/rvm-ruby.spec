@@ -8,7 +8,7 @@
 %define name rvm-ruby
 # pick a RVM version from https://github.com/wayneeseguin/rvm/tags
 %define version 1.20.10
-%define taglevel 7
+%define taglevel 8
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
 Summary: Ruby Version Manager (including Rubies and Gems)
@@ -194,6 +194,11 @@ exit 0
 %{_mandir}/man1/*
 
 %changelog
+* Sun Jul 14 2013 Thierry Parmentelat - rvm-ruby-1.20.10-8
+- create an omf gemset (in rvm-ruby-1.20.10-7)
+- make omf the default gemset
+- add libxml2 and lixslt dependencies for omf
+
 * Tue Jun 25 2013 Thierry Parmentelat - rvm-ruby-1.20.10-6
 - add omf-rc in the mix
 
