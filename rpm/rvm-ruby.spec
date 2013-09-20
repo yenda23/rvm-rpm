@@ -8,7 +8,7 @@
 %define name rvm-ruby
 # pick a RVM version from https://github.com/wayneeseguin/rvm/tags
 %define version 1.22.9
-%define taglevel 0
+%define taglevel 1
 %define release %{taglevel}%{?pldistro:.%{pldistro}}%{?date:.%{date}}
 
 Summary: Ruby Version Manager (including Rubies and Gems)
@@ -198,6 +198,9 @@ exit 0
 %{_mandir}/man1/*
 
 %changelog
+* Fri Sep 20 2013 Thierry Parmentelat <thierry.parmentelat@sophia.inria.fr> - rvm-ruby-1.22.9-1
+- move to version 1.22.9
+
 * Sun Jul 14 2013 Thierry Parmentelat - rvm-ruby-1.20.10-8
 - create an omf gemset (in rvm-ruby-1.20.10-7)
 - make omf the default gemset
