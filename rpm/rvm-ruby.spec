@@ -48,6 +48,10 @@ for i in $(env | grep ^rvm_ | cut -d"=" -f1); do
   unset $i;
 done
 
+# gpg keys
+curl -sSL https://rvm.io/mpapis.asc | gpg --import -
+curl -sSL https://rvm.io/pkuczynski.asc | gpg --import -
+
 # Install everything into one directory
 (
 export rvm_ignore_rvmrc=1 \
