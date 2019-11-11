@@ -17,6 +17,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-%(%{__id_u} -n)
 BuildRequires: bash curl git
 BuildRequires: gcc-c++ patch chrpath readline readline-devel zlib-devel libyaml-devel libffi-devel openssl-devel autoconf automake libtool bison
 BuildRequires: sed grep tar gzip bzip2 make file
+BuildRequires: sqlite-devel
 
 Requires(pre): shadow-utils
 # For rvm
@@ -108,7 +109,8 @@ export rvm_man_path="%{buildroot}%{_mandir}"
 source ${rvm_path}/scripts/rvm
 gemi='gem install --no-ri --no-rdoc'
 
-ruby_tag=ruby-1.9.3-p286
+ruby_tag=ruby-2.3.0
+rvm get stable
 rvm install $ruby_tag
 rvm use $ruby_tag
 $gemi bundler
@@ -159,13 +161,14 @@ for f in $(find $br -type l); do
   # destination is an absolute path, let's fix it
 	# call readlink with -f so all symlinmks are solved
 	# and so we can reliably substitute $brc that is also canonicalized
-	destc=$(readlink -f $f | sed -e "s,^$brc,,")
+	destc=$(readlink $f | sed -e "s,^$brc,,")
 	ln -sfn $destc $f
     fi
 done
 
 find $br -maxdepth 1 -name '.*' -exec rm -rf {} \;
 rm $br/usr/share/man/man1/rvm.1.gz
+rm -vf $br/usr/lib/share/man/man1/rvm.1.gz
 
 %clean
 rm -rf %{buildroot}
@@ -180,9 +183,16 @@ exit 0
 %config(noreplace) /etc/profile.d/rvm.sh
 %attr(-,root,%{rvm_group}) %{rvm_dir}
 %{_mandir}/man1/*
+/usr/lib/share/man/man1/rvm.1.gz
 
 %changelog
-* Fri May 18 2013 Christoph Dwertmann - 4.xxx
+* Mon Nov 11 2019 Jan Vojta
+- Ruby 2.3.0
+- add some deps
+- fix symlinks
+- (?) rvm.1.gz
+
+* Sat May 18 2013 Christoph Dwertmann - 4.xxx
 - downloads RVM instead of relying on local sources
 - works with latest RVM and Fedora
 - removed ruby build dependency
